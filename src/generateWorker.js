@@ -36,11 +36,10 @@ const makeInsertMembers = insert => (requiredParams, optionalParams, returnValue
   returnValues.map(preventNameUndefined).forEach(insertDeclaration);
 };
 
-// TODO
-const makeInsertExecute = insert => (funcName, allParameters) => {
+const makeInsertExecute = insert => (funcName, allParamsArray, hasReturnValue) => {
   const indent2 = makeIndent(insert);
   insert('const char* execute() {');
-  indent2(`cv::${funcName}(${allParameters.map(p => p.name).join(', ')});`);
+  indent2(`${hasReturnValue ? 'returnValue = ' : ''}cv::${funcName}(${allParamsArray.join(', ')});`);
   indent2('return "";');
   insert('}');
 };
@@ -100,10 +99,10 @@ module.exports = ({ namespace, self, isClassMethod = false }, signature) => {
   const {
     name: funcName,
     optionalParams,
-    returnValues
+    returnValues,
+    allParamsArray
   } = signature;
 
-  const allParameters = signature.requiredParams.concat(optionalParams);
   const requiredParams = isClassMethod ? signature.requiredParams.slice(1) : signature.requiredParams;
 
   const generated = [];
@@ -125,7 +124,7 @@ module.exports = ({ namespace, self, isClassMethod = false }, signature) => {
   insert('');
   insertMembers(requiredParams, optionalParams, returnValues);
   insert('');
-  insertExecute(funcName, allParameters);
+  insertExecute(funcName, allParamsArray, returnValues.some(val => val.name === 'returnValue'));
   insert('');
   insertReturn(returnValues);
   if (!!requiredParams.length) {

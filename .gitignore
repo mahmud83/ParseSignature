@@ -1,2 +1,6 @@
 node_modules
-generated
+generatedcc
+generatedmd
+mdsrc
+signatures
+.vscode
