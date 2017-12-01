@@ -1,4 +1,4 @@
-const capitalizeFirst = str => `${str[0].toUpperCase()}${str.substr(1)}`;
+const { capitalizeFirst } = require('./utils')
 
 const makeInsert = codeArray => line => codeArray.push(line);
 

@@ -1,3 +1,5 @@
+const { lowercaseFirst, splitLast, isUint } = require('./utils')
+
 const mdh3 = '###'
 const asyncIdentifier = 'Async'
 const makeDeclarationRegex = fn => new RegExp(`(\.|\s)${fn}\\(.*\\)`)
@@ -31,6 +33,45 @@ const getFunctionSignatures = (lines, fn) => {
 
 exports.getFunctionSignatures = getFunctionSignatures
 
+
+const flatTypes = ['Uchar', 'Char', 'Uint', 'Int', 'Number', 'String', 'Boolean']
+
+const transfromIfFlatType = type => flatTypes.some(t => t === type) ? lowercaseFirst(type) : type
+
+const getDeclaration = (typeString, name) => {
+  if (!typeString || !name) {
+    throw new Error(`getDeclaration invalid arguments: typeString '${typeString}', name '${name}'`)
+  }
+
+  const arrayDepth = (typeString.match(/\[/g) || []).length
+  if (arrayDepth !== (typeString.match(/\]/g) || []).length) {
+    throw new Error(`invalid arrayDepth '${arrayDepth}' for typeString '${typeString}'`)
+  }
+
+  const pieces = typeString.replace(/\[/g, '').replace(/\]/g, '').trim().split(' ')
+
+  const decl = arrayDepth ? { arrayDepth, name } : { name }
+
+  let type
+  if (pieces.length > 1) {
+    decl.numArrayElements = pieces[0]
+    if (!isUint(decl.numArrayElements)) {
+      throw new Error(`invalid numArrayElements: '${decl.numArrayElements}'`)
+    }
+    type = pieces[1]
+  } else {
+    type = pieces[0]
+  }
+
+  if (pieces.length > 2 || !type) {
+    throw new Error(`invalid typeString '${typeString}', pieces: '${pieces.join(', ')}'`)
+  }
+
+  decl.type = transfromIfFlatType(type)
+
+  return decl
+}
+
 const parseReturnValues = (signatureString) => {
   let returnValues = signatureString
     .substr(0, signatureString.lastIndexOf(':'))
@@ -39,23 +80,20 @@ const parseReturnValues = (signatureString) => {
     .replace('}', '')
     .split(',')
 
-  if (returnValues.length === 1) {
-    return ([{
-      type: returnValues[0],
-      name: 'returnValue'
-    }])
+  if (returnValues.length === 1 && !/\:/.test(returnValues)) {
+    return [getDeclaration(returnValues[0], 'returnValue')]
   }
 
   return returnValues.map(
     nameAndType => nameAndType
       .split(':')
       .map(el => el.trim())
-      .reduce((name, type) => ({ name, type }))
+      .reduce((name, type) => getDeclaration(type, name || 'returnValue'))
   )
 }
 
 const replaceConstructorArgCommas = (argsString, replaceWith) => {
-  let strCopy = '';
+  let strCopy = ''
   let up = false
   for (let i in argsString) {
     const c = argsString[i]
@@ -70,25 +108,25 @@ const replaceConstructorArgCommas = (argsString, replaceWith) => {
   return strCopy
 }
 
-
 const parseDeclaration = (decl) => {
-  const [type, name] = decl.split(' ').map(s => s.trim());
-  return ({
-    type,
-    name
-  });
+  const [type, name] = splitLast(decl.trim(), ' ').map(s => s.trim());
+  return getDeclaration(type, name)
 }
 
 const parseFunctionSignature = (signatureString) => {
   const returnValues = signatureString.includes(':')
     ? parseReturnValues(signatureString)
-    : null;
+    : null
 
   const openingBracketIdx = signatureString.indexOf('(')
   const closingBracketIdx = signatureString.lastIndexOf(')')
   const argsString = signatureString.substr(openingBracketIdx + 1, closingBracketIdx - openingBracketIdx - 1)
 
-  const argStrings = replaceConstructorArgCommas(argsString, ';').split(',')
+  const argStrings = replaceConstructorArgCommas(argsString, ';')
+    .split(',')
+    .map(s => s.replace(';', ','))
+
+  console.log(signatureString)
 
   const optionalArgs = argStrings
     .filter(s => s.includes('='))
@@ -97,9 +135,12 @@ const parseFunctionSignature = (signatureString) => {
       return Object.assign({}, parseDeclaration(declaration), { defaultValue })
     })
 
-  const requiredArgs = argStrings
-    .filter(s => !s.includes('='))
-    .map(s => parseDeclaration(s.trim()))
+  let requiredArgs = []
+  if (argStrings.some(s => s !== '')) {
+    requiredArgs = argStrings
+      .filter(s => !s.includes('='))
+      .map(s => parseDeclaration(s.trim()))
+  }
 
   const allArgs = optionalArgs
     .concat(requiredArgs)

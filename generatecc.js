@@ -3,7 +3,9 @@ const parseSignature = require('./src/parseSignature');
 const generateWorker = require('./src/generateWorker');
 
 const signature = `
-CV_EXPORTS_W void Rodrigues( InputArray src, OutputArray dst, OutputArray jacobian = noArray() );
+CV_WRAP static Ptr<SIFT> create( int nfeatures = 0, int nOctaveLayers = 3,
+  double contrastThreshold = 0.04, double edgeThreshold = 10,
+  double sigma = 1.6);
 `
 const signatureJSON = parseSignature(signature);
 
