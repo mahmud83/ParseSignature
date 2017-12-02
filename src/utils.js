@@ -13,3 +13,5 @@ exports.splitLast = (str, c) => {
   }
   return [str.substr(0, idx), str.substr(idx + 1)]
 }
+
+exports.logd = process.env.QUITE ? () => {} : console.log
