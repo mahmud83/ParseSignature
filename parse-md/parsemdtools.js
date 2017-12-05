@@ -1,8 +1,24 @@
-const { lowercaseFirst, splitLast, isUint, logd } = require('./utils')
+const { lowercaseFirst, splitLast, isUint, logd } = require('../tools/utils')
 
+const mdh2 = '##'
 const mdh3 = '###'
 const asyncIdentifier = 'Async'
 const makeDeclarationRegex = fn => new RegExp(`(\.|\s)${fn}\\(.*\\)`)
+
+const extractRegion = (lines, regionName) => {
+  const from = lines.findIndex(l => l.includes(mdh2) && l.includes(regionName))
+  if (from === -1) {
+    throw new Error(`region ${regionName} not found in md file`)
+  }
+
+  const sub = lines.slice(from + 1)
+  let to = sub.findIndex(l => l.includes(mdh2))
+  to = to === -1 ? sub.length - 1 : to
+
+  return sub.slice(0, to)
+}
+
+exports.extractRegion = extractRegion
 
 const extractFunctions = (lines) => {
   const syncAndAsyncFns = lines
@@ -143,6 +159,18 @@ const parseDeclaration = (decl) => {
   return getDeclaration(type, name)
 }
 
+const getArgsStrings = signatureString => {
+  const openingBracketIdx = signatureString.indexOf('(')
+  const closingBracketIdx = signatureString.lastIndexOf(')')
+  const argsString = signatureString.substr(openingBracketIdx + 1, closingBracketIdx - openingBracketIdx - 1)
+
+  logd('argsString:', argsString)
+
+  return replaceInnerSignatureCommas(argsString, ';')
+    .split(',')
+    .map(s => s.replace(';', ','))
+}
+
 const parseFunctionSignature = (signatureString) => {
   logd('parsing signature:', signatureString)
 
@@ -156,17 +184,8 @@ const parseFunctionSignature = (signatureString) => {
 
   logd('returnValues (%s) are: %s', (returnValues || []).length, JSON.stringify(returnValues))
 
-  const openingBracketIdx = signatureString.indexOf('(')
-  const closingBracketIdx = signatureString.lastIndexOf(')')
-  const argsString = signatureString.substr(openingBracketIdx + 1, closingBracketIdx - openingBracketIdx - 1)
-
-  logd('argsString:', argsString)
-
-  const argStrings = replaceInnerSignatureCommas(argsString, ';')
-    .split(',')
-    .map(s => s.replace(';', ','))
-
-  logd('argument strings:', argsString)
+  const argStrings = getArgsStrings()
+  logd('argument strings:', argStrings)
 
   const optionalArgs = argStrings
     .filter(s => s.includes('='))

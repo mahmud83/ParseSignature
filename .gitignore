@@ -1,6 +1,3 @@
 node_modules
-generatedcc
-generatedmd
-mdsrc
-signatures
+data
 .vscode

@@ -36,7 +36,7 @@ const fnSchema = new mongoose.Schema({
   ]
 })
 
-fnSchema.index({ fnName: 1, cvModule: 1}, { unique: true })
+fnSchema.index({ fnName: 1, owner: 1}, { unique: true })
 
 const Fn = mongoose.model('Functions', fnSchema)
 
