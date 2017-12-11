@@ -1,11 +1,12 @@
 const fs = require('fs')
 const path = require('path')
 const {
-  extractRegion,
   extractFunctions,
-  getFunctionSignatures,
-  parseFunctionSignature
+  getFunctionSignatures
 } = require('./parse-md/parsemdtools')
+const {
+  parseFunctionSignature
+} = require('./parse-md/parseFunctionSignature')
 const {
   capitalizeFirst,
   logd
@@ -19,9 +20,9 @@ const {
 
 const isClassFile = fileName => fileName === capitalizeFirst(fileName)
 
-const cvModule = 'core'
-const fileName = 'Mat';
-const functionToParse = 'perspectiveTransform'
+const cvModule = ''
+const fileName = '';
+const functionToParse = null //'compareHist'
 
 const owner = isClassFile(fileName) ? fileName : 'cv'
 
@@ -30,17 +31,6 @@ const mdFile = `./data/mdsrc/${fileName}.md`
 const outDir = `./data/signatures`
 
 const lines = fs.readFileSync(mdFile).toString().split('\r\n')
-
-
-console.log(extractRegion(
-  fs.readFileSync(mdFile).toString().split('\r\n'),
-  'Constructors'
-))
-
-
-
-
-return
 
 const fns = extractFunctions(lines)
 

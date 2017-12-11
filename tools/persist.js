@@ -7,19 +7,38 @@ const connect = (cb) => {
   db.once('open', cb)
 }
 
-const Clazz = mongoose.model('Classes', mongoose.Schema({
-  className: { type: String, required: true, unique: true },
-  cvModule: { type: String, required: true },
-  fields: { type: mongoose.Schema.Types.Mixed, required: true }
-}))
-
 const declType = {
   type: { type: String, required: true },
   name: { type: String, required: true },
-  defaultValue: { type: String },
   arrayDepth: { type: Number },
   numArrayElements: { type: Number }
 }
+
+const fieldDeclType = Object.assign({}, declType, {
+  forClassesOnly: { type: [String] }
+})
+
+const argType =  Object.assign({}, declType, {
+  defaultValue: { type: String }
+})
+
+const clazzSchema = new mongoose.Schema({
+  className: { type: String, required: true, unique: true },
+  cvModule: { type: String, required: true },
+  fields: [declType],
+  constructors: {
+    type: [{
+      optionalArgs: { type: [argType] },
+      requiredArgs: { type: [argType] },
+      returnsOther: String
+    }],
+    required: true
+  }
+})
+
+clazzSchema.index({ className: 1 }, { unique: true })
+
+const Clazz = mongoose.model('Classes', clazzSchema)
 
 const fnSchema = new mongoose.Schema({
   fnName: { type: String, required: true },
@@ -28,15 +47,15 @@ const fnSchema = new mongoose.Schema({
   hasAsync: { type: Boolean, required: true },
   signatures: [
     {
-      returnValues: { type: [declType] },
-      optionalArgs: { type: [declType] },
-      requiredArgs: { type: [declType] },
+      returnValues: { type: [argType] },
+      optionalArgs: { type: [argType] },
+      requiredArgs: { type: [argType] },
       allArgs: { type: String }
     }
   ]
 })
 
-fnSchema.index({ fnName: 1, owner: 1}, { unique: true })
+fnSchema.index({ fnName: 1, owner: 1 }, { unique: true })
 
 const Fn = mongoose.model('Functions', fnSchema)
 

@@ -1,4 +1,4 @@
-const { capitalizeFirst } = require('./utils')
+const { capitalizeFirst } = require('../tools/utils')
 
 const makeInsert = codeArray => line => codeArray.push(line);
 

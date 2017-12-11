@@ -1,0 +1,21 @@
+{
+  "name": "ParseSignature",
+  "version": "1.0.0",
+  "description": "",
+  "main": ".env.js",
+  "scripts": {
+    "parsemdclasses": "node -r ./.env parsemdclasses",
+    "parsemdfunctions": "node -r ./.env parsemdfunctions"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/justadudewhohacks/ParseSignature.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/justadudewhohacks/ParseSignature/issues"
+  },
+  "homepage": "https://github.com/justadudewhohacks/ParseSignature#readme"
+}
