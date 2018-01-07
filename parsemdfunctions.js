@@ -20,9 +20,11 @@ const {
 
 const isClassFile = fileName => fileName === capitalizeFirst(fileName)
 
-const cvModule = ''
-const fileName = '';
-const functionToParse = null //'compareHist'
+const cvModule = null//'core'
+const fileName = null//'Mat'
+const category = null//'imgproc functions'
+
+const functionToParse = null//'inrange'
 
 const owner = isClassFile(fileName) ? fileName : 'cv'
 
@@ -38,7 +40,7 @@ const fnsWithSignatures = fns
   .map(fn => Object.assign({}, { cvModule }, { owner }, fn ))
   .map(fn => Object.assign({}, fn, { signatures: getFunctionSignatures(lines, fn.fnName) }))
   .filter(fn => !functionToParse || functionToParse && fn.fnName === functionToParse)
-  .map(fn => Object.assign({}, fn, { signatures: fn.signatures.map(parseFunctionSignature) }))
+  .map(fn => Object.assign({}, fn, { signatures: fn.signatures.map(parseFunctionSignature), category }))
 
 //fnsWithSignatures.forEach(fn => fs.writeFileSync(path.join(outDir, `${fn.name}.json`), JSON.stringify(fn)))
 

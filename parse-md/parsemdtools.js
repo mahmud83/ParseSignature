@@ -1,7 +1,7 @@
 const mdh2 = '##'
 const mdh3 = '###'
 const asyncIdentifier = 'Async'
-const makeDeclarationRegex = fn => new RegExp(`(\.|\s)${fn}\\(.*\\)`)
+const makeDeclarationRegex = fn => new RegExp(`^${fn}\\(.*\\)|(\\.|\\s)${fn}\\(.*\\)`)
 
 const extractRegion = (lines, regionName) => {
   const from = lines.findIndex(l => l.includes(mdh2) && l.includes(regionName))

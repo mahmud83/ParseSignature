@@ -14,8 +14,9 @@ const {
   connect
 } = require('./tools/persist')
 
-const cvModule = 'core'
-const fileName = 'RotatedRect';
+
+const cvModule = //'ximgproc'
+const fileName = //'SuperpixelSEEDS'
 
 const className = fileName
 
@@ -23,21 +24,33 @@ const mdFile = `./data/mdsrc/${fileName}.md`
 //const outDir = `./data/signatures/${cvModule}${clazz ? `/${clazz}` : ''}`
 const outDir = `./data/signatures`
 
-const constructors = parseConstructors(
-  extractRegion(
+let constructors = [], fields = []
+
+try {
+  const constructorsSection = extractRegion(
     fs.readFileSync(mdFile).toString().split('\r\n'),
     'Constructors'
-  ),
-  className
-)
+  )
+  constructors = parseConstructors(
+    constructorsSection,
+    className
+  )
+} catch (err) {
+  console.log(err)
+}
 
 
-const fields = parseFields(
-  extractRegion(
+try {
+  const fieldsSection = extractRegion(
     fs.readFileSync(mdFile).toString().split('\r\n'),
     'Accessors'
   )
-)
+  fields = parseFields(fieldsSection)
+} catch (err) {
+  console.log(err)
+}
+
+
 
 logd(constructors.map(c => JSON.stringify(c)))
 logd(fields.map(f => JSON.stringify(f)))

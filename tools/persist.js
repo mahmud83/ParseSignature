@@ -31,8 +31,7 @@ const clazzSchema = new mongoose.Schema({
       optionalArgs: { type: [argType] },
       requiredArgs: { type: [argType] },
       returnsOther: String
-    }],
-    required: true
+    }]
   }
 })
 
@@ -45,6 +44,7 @@ const fnSchema = new mongoose.Schema({
   cvModule: { type: String, required: true },
   owner: { type: String, required: true },
   hasAsync: { type: Boolean, required: true },
+  category: { type: String },
   signatures: [
     {
       returnValues: { type: [argType] },

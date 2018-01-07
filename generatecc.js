@@ -3,7 +3,9 @@ const parseSignature = require('./generate-cc/parseSignature');
 const generateWorker = require('./generate-cc/generateWorker');
 
 const signature = `
-CV_EXPORTS_W void transform(InputArray src, OutputArray dst, InputArray m )
+CV_EXPORTS_W void cornerMinEigenVal( InputArray src, OutputArray dst,
+  int blockSize, int ksize = 3,
+  int borderType = BORDER_DEFAULT );
 `
 const signatureJSON = parseSignature(signature);
 

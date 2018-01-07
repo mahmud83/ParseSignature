@@ -9,7 +9,10 @@ module.exports = (lines) => {
   logd('parsing fields from lines:')
   logd(lines)
 
-  const declarations = lines.filter(l => fieldRegex.test(l))
+  const declarations = lines
+    .filter(l => fieldRegex.test(l))
+    .map(l => l.replace(',', ''))
+    .map(l => l.trim())
   logd('declarations')
   logd(declarations)
 
